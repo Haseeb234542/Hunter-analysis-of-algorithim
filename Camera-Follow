@@ -1,0 +1,46 @@
+using UnityEngine;
+
+public class CameraFollow : MonoBehaviour
+{
+    public Transform player;           // Player ka Transform
+    public float smoothSpeed = 5f;     // Smooth follow speed
+    public Vector3 offset = new Vector3(0, 1, -10); // Camera offset
+    
+    public float leftLimit = -2f;       // Left boundary (camera stop at level start)
+    public float rightLimit = 30f;     // Right boundary (level end limit)
+    
+    void LateUpdate()
+    {
+        if (player == null)
+        {
+            // Find player if not assigned
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+                player = playerObj.transform;
+            else
+                return;
+        }
+        
+        // Target position (player position + offset)
+        Vector3 targetPosition = new Vector3(player.position.x + offset.x, offset.y, offset.z);
+        
+        // Apply boundaries
+        targetPosition.x = Mathf.Clamp(targetPosition.x, leftLimit, rightLimit);
+        
+        // Smooth follow
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+        
+        // Apply to camera
+        transform.position = smoothedPosition;
+    }
+    
+    // Optional: Draw boundaries in Scene view
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Vector3 leftBoundary = new Vector3(leftLimit, 0, 0);
+        Vector3 rightBoundary = new Vector3(rightLimit, 0, 0);
+        Gizmos.DrawWireCube(leftBoundary, new Vector3(0.5f, 10, 0));
+        Gizmos.DrawWireCube(rightBoundary, new Vector3(0.5f, 10, 0));
+    }
+}
