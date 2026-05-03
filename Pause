@@ -1,0 +1,61 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PauseManager : MonoBehaviour
+{
+    public GameObject pausePanel;
+    public GameObject pauseButtonCanvas;
+    
+    private bool isPaused = false;
+
+    void Start()
+    {
+        if (pausePanel != null) pausePanel.SetActive(false);
+    }
+
+    void Update()
+    {
+        // ✅ ESC key check - yeh hamesha chalega
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+    }
+
+    public void PauseGame()
+    {
+        isPaused = true;
+        Time.timeScale = 0f;
+        
+        if (pausePanel != null) pausePanel.SetActive(true);
+        if (pauseButtonCanvas != null) pauseButtonCanvas.SetActive(false);
+    }
+
+    public void ResumeGame()
+    {
+        isPaused = false;
+        Time.timeScale = 1f;
+        
+        if (pausePanel != null) pausePanel.SetActive(false);
+        if (pauseButtonCanvas != null) pauseButtonCanvas.SetActive(true);
+    }
+
+    public void NewGame()
+    {
+        Time.timeScale = 1f;
+        GameManager.score = 0;
+        GameManager.health = 3;
+        SceneManager.LoadScene("Level1");
+    }
+
+    public void ExitToHome()
+    {
+        Time.timeScale = 1f;
+        GameManager.score = 0;
+        GameManager.health = 3;
+        SceneManager.LoadScene("HomeScene");
+    }
+}
