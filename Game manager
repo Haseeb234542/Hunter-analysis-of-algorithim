@@ -1,0 +1,120 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class GameManager : MonoBehaviour
+{
+    public static int score = 0;
+    public static int health = 3;
+    
+    public GameObject gameOverPanel;
+    public GameObject winPanel;
+    public TextMeshProUGUI scoreText;
+    public GameObject[] heartIcons;
+    
+    private bool isGameOver = false;
+    private bool isGameWin = false;
+
+    void Start()
+    {
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (winPanel != null) winPanel.SetActive(false);
+        UpdateUI();
+    }
+
+    void Update()
+    {
+        UpdateScoreUI();
+    }
+
+    void UpdateScoreUI()
+    {
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
+    }
+
+    void UpdateHealthUI()
+    {
+        if (heartIcons == null) return;
+        
+        for (int i = 0; i < heartIcons.Length; i++)
+        {
+            if (heartIcons[i] != null)
+                heartIcons[i].SetActive(i < health);
+        }
+    }
+
+    void UpdateUI()
+    {
+        UpdateScoreUI();
+        UpdateHealthUI();
+    }
+
+    public static void TakeDamage(int damage)
+    {
+        if (health <= 0) return;
+        
+        health -= damage;
+        Debug.Log("Health: " + health);
+        
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm != null) gm.UpdateHealthUI();
+        
+        if (health <= 0)
+        {
+            health = 0;
+            GameOver();
+        }
+    }
+
+    public static void AddScore(int value)
+    {
+        score += value;
+        Debug.Log("Score: " + score);
+        
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm != null) gm.UpdateScoreUI();
+    }
+
+    public static void GameOver()
+    {
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm == null) return;
+        
+        if (gm.isGameOver || gm.isGameWin) return;
+        gm.isGameOver = true;
+        
+        if (gm.gameOverPanel != null)
+            gm.gameOverPanel.SetActive(true);
+        
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) Destroy(player);
+    }
+
+    public static void GameWin()
+    {
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm == null) return;
+        
+        if (gm.isGameOver || gm.isGameWin) return;
+        gm.isGameWin = true;
+        
+        if (gm.winPanel != null)
+            gm.winPanel.SetActive(true);
+        
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            player.GetComponent<PlayerMovement>().enabled = false;
+        }
+    }
+
+    public void RestartGame()
+    {
+        score = 0;
+        health = 3;
+        isGameOver = false;
+        isGameWin = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+}
