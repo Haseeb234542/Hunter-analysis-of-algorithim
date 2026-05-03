@@ -1,0 +1,68 @@
+using UnityEngine;
+
+public class EnemyAI : MonoBehaviour
+{
+    public float speed = 2f;
+    public float moveRange = 2f;
+
+    private Vector3 startPos;
+    private int direction = 1;
+    private SpriteRenderer spriteRenderer;
+    private Animator anim;
+
+    void Start()
+    {
+        startPos = transform.position;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        // Move enemy
+        transform.Translate(Vector2.right * direction * speed * Time.deltaTime);
+
+        // Flip sprite based on direction
+        if (direction > 0)
+            spriteRenderer.flipX = true;
+        else if (direction < 0)
+            spriteRenderer.flipX = false;
+
+        // Check if reached move range
+        if (Vector3.Distance(startPos, transform.position) > moveRange)
+            direction *= -1;
+
+        // ✅ Animation: Speed parameter set karo
+        if (anim != null)
+        {
+            // Enemy moving hai to Speed = 1, nahi to 0
+            float currentSpeed = (direction != 0) ? 1f : 0f;
+            anim.SetFloat("Speed", currentSpeed);
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // Player jumped on enemy head
+            if (collision.transform.position.y > transform.position.y + 0.5f)
+            {
+                Destroy(gameObject);
+                Debug.Log("Enemy stomped!");
+            }
+            else
+            {
+                if (GameManager.health > 1)
+                {
+                    GameManager.TakeDamage(1);
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    GameManager.TakeDamage(1);
+                }
+            }
+        }
+    }
+}
